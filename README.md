@@ -1,1 +1,1 @@
-# OCR---Based-Contract-Analysis-and-Simplification-System-
+# Final-Year-Project

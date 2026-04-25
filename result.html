@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OCR - Based Contract Analysis and Simplification System | Analysis Result</title>
+
+  <!-- jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="style.css" />
+  
+</head>
+
+<body>
+  <div class="bg-image"></div>
+  <div class="blob"></div>
+  <div class="blob2"></div>
+
+  <div class="page-shell result-shell">
+    <header class="result-header">
+      <div class="brand">
+        <img src="images/logo.png" alt="OCR Logo">
+        <div>
+          <p class="site-title">OCR - Based Contract Analysis</p>
+          <p class="site-subtitle">Simplification System Report</p>
+        </div>
+      </div>
+      <span class="status-pill">Analysis Complete</span>
+    </header>
+
+    <main class="result-card glass">
+      <div class="result-intro">
+        <h1>Contract analysis is ready</h1>
+        <p>Review a professional summary that highlights contract parties, payment obligations, risk level, and complex legal terms.</p>
+      </div>
+
+      <section class="report-section hero-metrics">
+        <div class="section-title-row">
+          <div>
+            <p class="section-kicker">Overview</p>
+            <h2 class="section-title">Contract Snapshot</h2>
+          </div>
+          <p class="section-caption">A quick view of sector, risk, parties, and payment obligations.</p>
+        </div>
+
+        <div class="result-grid">
+          <div class="info-card accent-sector">
+            <p class="label">Detected sector</p>
+            <p id="sector" class="value"></p>
+          </div>
+          <div class="info-card risk-card accent-risk">
+            <p class="label">Contract risk</p>
+            <div class="risk-gauge-wrapper">
+              <div class="risk-gauge">
+                <div class="risk-gauge-arc"></div>
+                <div class="risk-pointer" id="riskPointer"></div>
+                <div class="risk-center"></div>
+              </div>
+              <div class="risk-scale">
+                <span>Low</span>
+                <span>Medium</span>
+                <span>High</span>
+              </div>
+            </div>
+            <p id="risk" class="value risk-text"></p>
+          </div>
+          <div class="info-card accent-neutral">
+            <p class="label">Contract parties</p>
+            <p id="parties" class="value small-value"></p>
+          </div>
+          <div class="info-card accent-payment">
+            <p class="label">Payment summary</p>
+            <p id="paymentSummary" class="value small-value"></p>
+          </div>
+        </div>
+      </section>
+
+      <section class="report-section">
+        <div class="section-title-row">
+          <div>
+            <p class="section-kicker">Interpretation</p>
+            <h2 class="section-title">Meaning And Summary</h2>
+          </div>
+          <p class="section-caption">These sections make the contract easier to understand at a glance.</p>
+        </div>
+
+        <div class="content-grid">
+          <div class="content-card feature-panel">
+            <p class="label">Agreement overview</p>
+            <p id="agreementOverview" class="summary-text"></p>
+          </div>
+
+          <div class="content-card feature-panel">
+            <p class="label">Complex words with simplified meaning</p>
+            <ul id="complexTerms" class="detail-list"></ul>
+          </div>
+
+          <div class="content-card feature-panel full-span">
+            <p class="label">Short contract summary</p>
+            <p id="summary" class="summary-text"></p>
+          </div>
+        </div>
+      </section>
+
+      <section class="report-section">
+        <div class="section-title-row">
+          <div>
+            <p class="section-kicker">Explore</p>
+            <h2 class="section-title">Search And Key Clauses</h2>
+          </div>
+          <p class="section-caption">Use keyword search to jump to the most relevant points in the document.</p>
+        </div>
+
+        <div class="content-grid search-grid">
+          <div class="content-card search-card feature-panel">
+            <div class="search-title">
+              <p class="label">Keyword search</p>
+              <p class="search-help">Find the most relevant contract points.</p>
+            </div>
+            <input id="searchInput" type="text" placeholder="Search keyword, e.g. payment" class="search-input" />
+            <p id="searchStatus" class="search-status"></p>
+          </div>
+
+          <div class="content-card feature-panel">
+            <p class="label">Key points</p>
+            <ul id="keyPoints" class="detail-list"></ul>
+          </div>
+        </div>
+      </section>
+
+      <div class="actions-row">
+        <button onclick="window.location.href='index.html'" class="btn alt">Analyze another contract</button>
+        <button onclick="downloadPDF()" class="btn primary">Download PDF report</button>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const stored = sessionStorage.getItem("analysisResult");
+      if (!stored) {
+        window.location.href = "index.html";
+        return;
+      }
+
+      const data = JSON.parse(stored);
+      const sectorEl = document.getElementById("sector");
+      const riskEl = document.getElementById("risk");
+      const riskPointer = document.getElementById("riskPointer");
+      const summaryEl = document.getElementById("summary");
+      const agreementEl = document.getElementById("agreementOverview");
+      const partiesEl = document.getElementById("parties");
+      const paymentEl = document.getElementById("paymentSummary");
+      const complexTermsUL = document.getElementById("complexTerms");
+      const keyPointsUL = document.getElementById("keyPoints");
+      const searchInput = document.getElementById("searchInput");
+      const searchStatus = document.getElementById("searchStatus");
+
+      sectorEl.textContent = data.sector || "Not detected";
+      riskEl.textContent = data.risk || "Low";
+      summaryEl.textContent = data.summary;
+      agreementEl.textContent = data.agreementOverview;
+      partiesEl.textContent = data.parties;
+      paymentEl.textContent = data.paymentSummary;
+
+      if (riskPointer && typeof data.riskMeter === "number") {
+        const degrees = Math.min(180, Math.max(0, (data.riskMeter / 100) * 180));
+        riskPointer.style.transform = `rotate(${degrees - 90}deg)`;
+      }
+
+      const riskCard = document.querySelector(".risk-card");
+      if (riskCard && data.risk) {
+        riskCard.classList.add(data.risk.toLowerCase());
+      }
+
+      const originalPoints = data.keyPoints || [];
+      renderList(keyPointsUL, originalPoints);
+      renderList(complexTermsUL, data.complexTerms || []);
+
+      searchInput.addEventListener("input", () => {
+        const q = searchInput.value.toLowerCase().trim();
+        if (!q) {
+          renderList(keyPointsUL, originalPoints);
+          searchStatus.textContent = "";
+          return;
+        }
+
+        const filtered = originalPoints.filter((p) => p.toLowerCase().includes(q));
+        if (filtered.length === 0) {
+          keyPointsUL.innerHTML = "";
+          searchStatus.textContent = "No matching clauses found.";
+        } else {
+          renderList(keyPointsUL, filtered);
+          searchStatus.textContent = `${filtered.length} match(es) found.`;
+        }
+      });
+
+      window.downloadPDF = function () {
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF();
+        let y = 16;
+
+        pdf.setFontSize(18);
+        pdf.text("OCR-Based Contract Analysis Report", 14, y);
+        y += 10;
+
+        pdf.setFontSize(11);
+        pdf.text(`Detected sector: ${data.sector || "Not detected"}`, 14, y);
+        y += 7;
+        pdf.text(`Risk level: ${data.risk}`, 14, y);
+        y += 7;
+        pdf.text(`Parties: ${data.parties}`, 14, y);
+        y += 7;
+        pdf.text(`Payment: ${data.paymentSummary}`, 14, y);
+        y += 12;
+
+        pdf.setFontSize(13);
+        pdf.text("Agreement overview:", 14, y);
+        y += 7;
+        pdf.setFontSize(11);
+        pdf.text(pdf.splitTextToSize(data.agreementOverview, 182), 14, y);
+        y += 16;
+
+        pdf.setFontSize(13);
+        pdf.text("Short contract summary:", 14, y);
+        y += 7;
+        pdf.setFontSize(11);
+        pdf.text(pdf.splitTextToSize(data.summary, 182), 14, y);
+        y += 16;
+
+        pdf.setFontSize(13);
+        pdf.text("Complex words:", 14, y);
+        y += 7;
+        pdf.setFontSize(11);
+        (data.complexTerms || []).forEach((term, index) => {
+          const lines = pdf.splitTextToSize(`${index + 1}. ${term}`, 182);
+          pdf.text(lines, 14, y);
+          y += lines.length * 6;
+        });
+        y += 10;
+
+        pdf.setFontSize(13);
+        pdf.text("Key points:", 14, y);
+        y += 7;
+        pdf.setFontSize(11);
+        originalPoints.forEach((point, index) => {
+          const lines = pdf.splitTextToSize(`${index + 1}. ${point}`, 182);
+          pdf.text(lines, 14, y);
+          y += lines.length * 6;
+        });
+
+        pdf.save("OCR_Contract_Report.pdf");
+      };
+
+      function renderList(container, items) {
+        container.innerHTML = "";
+        items.forEach((item) => {
+          const li = document.createElement("li");
+          li.textContent = item;
+          container.appendChild(li);
+        });
+      }
+    });
+    
+  </script>
+</body>
+</html>

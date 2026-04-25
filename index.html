@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OCR - Based Contract Analysis and Simplification System</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Tesseract -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.105/pdf.min.js"></script>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <div class="bg-image"></div>
+  <div class="blob"></div>
+  <div class="blob2"></div>
+
+  <div class="page-loader" id="pageLoader">
+    <img src="images/logo.png" alt="OCR Logo">
+    <div class="spinner"></div>
+    <p>Loading OCR-Based Contract Analysis...</p>
+  </div>
+
+  <div class="intro" id="intro">
+    <video id="introVideo" autoplay muted playsinline preload="auto">
+      <source src="videos/intro.mp4" type="video/mp4">
+    </video>
+    <div class="intro-logo">
+      <img src="images/logo.png" alt="OCR Logo">
+    </div>
+  </div>
+
+  <div class="page-shell">
+    <header class="site-header">
+      <div class="brand">
+        <img src="images/logo.png" alt="OCR Logo">
+        <div>
+          <p class="site-title">OCR - Based Contract Analysis</p>
+          <p class="site-subtitle"><strong>and Simplification System</strong></p>
+        </div>
+      </div>
+    </header>
+
+    <main class="hero">
+      <section class="hero-copy">
+        <span class="eyebrow">OCR - Based Contract Analysis</span>
+        <h1>Analyze contracts instantly and simplify legal terms with clarity.</h1>
+        <p>Upload a contract image, let the system detect sector, payment terms, parties, and contract risks with a polished output for decision-makers.</p>
+
+        <div class="feature-grid">
+          <article class="feature-card">
+            <h3>OCR-powered extraction</h3>
+            <p>Automatically convert scanned contracts into structured, reviewable text.</p>
+          </article>
+          <article class="feature-card">
+            <h3>Payment insights</h3>
+            <p>Detect money obligations, amounts, and related clauses in the agreement.</p>
+          </article>
+          <article class="feature-card">
+            <h3>Plain language summary</h3>
+            <p>Get a short agreement overview with simplified legal terms and complex word explanations.</p>
+          </article>
+        </div>
+      </section>
+
+      <aside class="glass upload-panel">
+        <div class="panel-header">
+          <span>Upload your contract</span>
+        </div>
+        <p class="panel-copy">Upload a contract file to begin automated analysis. Supported file types: PDF, JPG, JPEG, PNG.</p>
+
+        <form id="contractForm" class="upload-form">
+          <label class="input-group" for="fileInput">
+            <span>Choose contract file</span>
+            <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png" />
+          </label>
+
+          <button id="submitBtn" type="submit" disabled class="btn primary">Analyze Contract</button>
+        </form>
+
+        <div class="upload-status">
+          <span id="statusIcon">📄</span>
+          <p id="analyzeStatus">Select a contract image to begin.</p>
+        </div>
+
+        <div id="progressBox" class="hidden analyze-loader">
+          <div class="progress-status">
+            <span class="status-symbol">⚡</span>
+            <p class="analyze-text">Preparing OCR and contract intelligence modules…</p>
+          </div>
+          <div class="progress-shell">
+            <div id="progressBar" class="progress-bar"></div>
+          </div>
+        </div>
+
+        <p class="note">Designed for legal, finance, and operations teams who need fast, professional contract review.</p>
+      </aside>
+    </main>
+
+    <section class="how-it-works">
+      <div class="section-heading">
+        <p class="section-eyebrow">How it works</p>
+        <h2>Three simple steps to smarter contract review</h2>
+      </div>
+
+      <div class="steps-grid">
+        <article class="step-card">
+          <div class="step-badge">1</div>
+          <h3>Upload document</h3>
+          <p>Select a contract image or PDF, and the system will process every page.</p>
+        </article>
+        <article class="step-card">
+          <div class="step-badge">2</div>
+          <h3>Review results</h3>
+          <p>View risk level, contract sector, and simplified clauses instantly.</p>
+        </article>
+        <article class="step-card">
+          <div class="step-badge">3</div>
+          <h3>Take action</h3>
+          <p>Download the report or analyze another contract with one click.</p>
+        </article>
+      </div>
+    </section>
+  </div>
+
+  <audio id="processingSound" loop>
+    <source src="sounds/processing.mp3" type="audio/mpeg">
+  </audio>
+
+  <script src="script.js"></script>
+  <script>
+    const loader = document.getElementById("pageLoader");
+    window.addEventListener("load", () => {
+      setTimeout(() => {
+        loader.style.opacity = "0";
+        loader.style.pointerEvents = "none";
+        setTimeout(() => loader.remove(), 600);
+      }, 800);
+    });
+  </script>
+
+  <script>
+    const intro = document.getElementById("intro");
+    const v = document.getElementById("introVideo");
+    v.play().catch(() => {});
+    setTimeout(() => {
+      intro.style.opacity = "0";
+      intro.style.pointerEvents = "none";
+      setTimeout(() => intro.remove(), 800);
+    }, 1000);
+  </script>
+</body>
+</html>
+
